@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import random
 import sys
 import time
@@ -39,8 +40,8 @@ if __name__ == "__main__":
 
     # Decision Tree
     iterations = 10
-    TrainAccuraciesDT = np.array([])
-    TestAccuraciesDT = np.array([])
+    trainAccuraciesDT = np.array([])
+    testAccuraciesDT = np.array([])
     times_dt = np.array([])
     for i in range(iterations):
         random.seed(i)
@@ -89,19 +90,21 @@ if __name__ == "__main__":
         ("Max Accuracy", maxTrainDT, maxTestDT),
         ("Mean Accuracy", meanTrainDT, meanTestDT),
         ("Stdev Accuracy", stdTrainDT, stdTestDT),
-        ("Min Run-Time", minTimeDT, ""),
-        ("Max Run-Time", maxTimeDT, ""),
-        ("Mean Run-Time", meanTimeDT, ""),
-        ("Stdev Run-Time", stdTimeDT, "")
+        ("Min Run-Time", minTimeDT, None),
+        ("Max Run-Time", maxTimeDT, None),
+        ("Mean Run-Time", meanTimeDT, None),
+        ("Stdev Run-Time", stdTimeDT, None)
     ]
 
-    dt_results = spark.createDataFrame(dt_values, dt_columns)
+    dt_results = spark.createDataFrame(
+        pd.DataFrame(dt_values, columns=dt_columns)
+    )
     dt_results.coalesce(1).write.csv(sys.argv[2] + "/dt_results", header=True)
 
     #Logistic Regression
     iterations = 10
-    TrainAccuraciesLR = np.array([])
-    TestAccuraciesLR = np.array([])
+    trainAccuraciesLR = np.array([])
+    testAccuraciesLR = np.array([])
     times_lr = np.array([])
     for i in range(iterations):
         random.seed(i)
@@ -148,13 +151,15 @@ if __name__ == "__main__":
         ("Max Accuracy", maxTrainLR, maxTestLR),
         ("Mean Accuracy", meanTrainLR, meanTestLR),
         ("Stdev Accuracy", stdTrainLR, stdTestLR),
-        ("Min Run-Time", minTimeLR, ""),
-        ("Max Run-Time", maxTimeLR, ""),
-        ("Mean Run-Time", meanTimeLR, ""),
-        ("Stdev Run-Time", stdTimeLR, "")
+        ("Min Run-Time", minTimeLR, None),
+        ("Max Run-Time", maxTimeLR, None),
+        ("Mean Run-Time", meanTimeLR, None),
+        ("Stdev Run-Time", stdTimeLR, None)
     ]
 
-    lr_results = spark.createDataFrame(lr_values, lr_columns)
+    lr_results = spark.createDataFrame(
+        pd.DataFrame(lr_values, columns=lr_columns)
+    )
     lr_results.coalesce(1).write.csv(sys.argv[2] + "/lr_results", header=True)
 
     spark.stop()
