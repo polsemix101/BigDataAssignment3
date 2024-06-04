@@ -96,4 +96,65 @@ if __name__ == "__main__":
     ]
 
     dt_results = spark.createDataFrame(dt_values, dt_columns)
-    dt_results.coalesce(1).write.csv(sys.argv[2] + "/results", header=True)
+    dt_results.coalesce(1).write.csv(sys.argv[2] + "/dt_results", header=True)
+
+    #Logistic Regression
+    iterations = 10
+    TrainAccuraciesLR = np.array([])
+    TestAccuraciesLR = np.array([])
+    times_lr = np.array([])
+    for i in range(iterations):
+        random.seed(i)
+        lr = LogisticRegression(labelCol="label",featuresCol="features")
+
+        (trainingData, testData) = dataTransform.randomSplit([0.7,0.3])
+
+        lr_start = time.time()
+        model = lr.fit(trainingData)
+        lr_end = time.time()
+
+        exec_time = lr_end - lr_start
+        times_lr = np.append(times_lr, exec_time)
+
+        train_pred = model.transform(trainingData)
+        test_pred = model.transform(testData)
+
+        evaluator = MulticlassClassificationEvaluator(
+            labelCol="label", predictionCol="prediction", metricName="accuracy"
+        )
+
+        trainAccuracy = evaluator.evaluate(train_pred)
+        testAccuracy = evaluator.evaluate(test_pred)
+        trainAccuraciesLR = np.append(trainAccuraciesLR, trainAccuracy)
+        testAccuraciesLR = np.append(testAccuraciesLR, testAccuracy)
+
+    # summary statistics
+    minTrainLR = np.min(trainAccuraciesLR)
+    maxTrainLR = np.max(trainAccuraciesLR)
+    meanTrainLR = np.mean(trainAccuraciesLR)
+    stdTrainLR = np.std(trainAccuraciesLR)
+    minTestLR = np.min(testAccuraciesLR)
+    maxTestLR = np.max(testAccuraciesLR)
+    meanTestLR = np.mean(testAccuraciesLR)
+    stdTestLR = np.std(testAccuraciesLR)
+    minTimeLR = np.min(times_lr)
+    maxTimeLR = np.max(times_lr)
+    meanTimeLR = np.mean(times_lr)
+    stdTimeLR = np.std(times_lr)
+    
+    lr_columns = ["Measure", "Training", "Test"]
+    lr_values = [
+        ("Min Accuracy", minTrainLR, minTestLR),
+        ("Max Accuracy", maxTrainLR, maxTestLR),
+        ("Mean Accuracy", meanTrainLR, meanTestLR),
+        ("Stdev Accuracy", stdTrainLR, stdTestLR),
+        ("Min Run-Time", minTimeLR, ""),
+        ("Max Run-Time", maxTimeLR, ""),
+        ("Mean Run-Time", meanTimeLR, ""),
+        ("Stdev Run-Time", stdTimeLR, "")
+    ]
+
+    lr_results = spark.createDataFrame(lr_values, lr_columns)
+    lr_results.coalesce(1).write.csv(sys.argv[2] + "/lr_results", header=True)
+
+    spark.stop()
