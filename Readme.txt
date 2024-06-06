@@ -31,8 +31,8 @@ part1.py takes 2 inputs:
 - path to input data
 - path to output folder
 
-$ spark-submit --master yarn --deploy-mode cluster multinomial_logistic.py
-/user/<username>/input/covtype.data /user/<username>/output
+$ spark-submit --master yarn --deploy-mode cluster part1.py
+/user/<username>/input/kdd.data /user/<username>/output
 
 ## Retrieve Results
 
