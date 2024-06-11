@@ -15,7 +15,6 @@
 \maketitle
 
 \section{Introduction}
-\paragraph{}
 In this project, we trained a Decision Tree and a Logistic Regression model on the KDD Dataset 
 \cite{JAM} using Spark Machine Learning Libraries. The dataset contains 47,736 observations of simulated network intrusion on a military network environment, with 41 features to aid in prediction, and a label for "normal" or "anomaly" that we are trying to predict. The classes are well balanced in the data, with 24,576 labelled "anomaly" and 23,160 labelled "normal".
 
@@ -98,7 +97,7 @@ or Linux. If you are running Windows, you can use WSL (Windows
 Subsystem for Linux) or some other method to move the files onto the 
 network location
 
-Move part1.py, kdd.data, and SetupSparkClasspath.sh to
+Move part1.py, kdd.data.txt, and SetupSparkClasspath.sh to
 barretts@ecs.vuw.ac.nz
 $ scp part1.py <username>@barretts.ecs.vuw.ac.nz:
 etc..
@@ -119,7 +118,7 @@ create directory for input and output datasets
 $ hadoop fs -mkdir /user/<username>/input /user/<username>/output
 
 upload input data into hdfs
-$ hadoop fs -put kdd.data /user/<username>/input/
+$ hadoop fs -put kdd.data.txt /user/<username>/input/
 
 ## Run Spark Job
 part1.py takes 2 inputs:
@@ -127,7 +126,7 @@ part1.py takes 2 inputs:
 - path to output folder
 
 $spark-submit --master yarn --deploy-mode cluster part1.py
-/user/<username>/input/kdd.data /user/<username>/output
+/user/<username>/input/kdd.data.txt /user/<username>/output
 
 ## Retrieve Results
 move from hdfs to ecs local
@@ -138,8 +137,8 @@ move from ECS system to desired path local pc
 $ scp -r <username>@barretts.ecs.vuw.ac.nz:~/output ~/path/to/local
 \end{verbatim}
 
-\section{Model Results and comparison}
-
+\section{Model Results and Analysis}
+\subsection{Results}
 \begin{table}[h]
 \centering
 \caption{Summary statistics for the training and test accuracy, and training time for a Decision Tree and Logistic Regression model on the KDD Dataset}
@@ -159,11 +158,21 @@ Stdev Run-Time/s & \multicolumn{1}{l|}{0.92} & -                & \multicolumn{1
 \end{tabular}
 \end{table}
 
-\paragraph{}
-Both models are being run with default settings. The results we obtained from these models on the KDD dataset are given in Table \ref{results table}. As it can be seen in the "Mean Accuracy" row, both models' training and test accuracy are roughly equal, which means neither model is overfitting and the model generalises well to unseen data, which is desirable. The Decision Tree performs better on this dataset than Logistic Regression. The minimum test accuracy of the Decision Tree is 0.943, and the maximum test accuracy of the Logistic Regression is 0.891, so even in the worst case the Decision Tree model performs quite a bit better than the best case of the Logistic Regression. Both models have a very low standard deviation, which indicates there aren't any convergence issues, and that they have a very stable performance on this dataset. 
+\subsection{Result Analysis}
+\subsubsection{Accuracy}
+Both models are being run with default settings. The results we obtained from these models on the KDD dataset are given in Table \ref{results table}. Exhibiting a clear edge, the Decision Tree model not only reaches higher accuracy levels—with a mean of 0.952 for training and 0.950 for testing—but also outpaces Logistic Regression, which maintains a mean accuracy of 0.888 across both datasets. While Decision Trees show a slightly higher variability in performance (a standard deviation of 0.0029 for training and 0.0038 for testing compared to Logistic Regression's 0.0012 and 0.0017, respectively), the model remains a strong contender due to its robustness across different trials.
 
-\paragraph{}
-The mean runtime of the Decision Tree model is half of the mean runtime for the Logistic Regression model, however both of them still only takes a couple of seconds, which is immaterial with the current size of the data. It is unknown how this performance scales with an increase in the size of the data, but if these proportions remained fairly consistent then the faster training time seen for the Decision Tree may also factor into it being a better choice of model when the training time becomes a determining factor.
+\subsubsection{Running Speed}
+
+When it comes to speed, Decision Trees take the lead, clocking in at an average of 2.28 seconds for training, which starkly contrasts with the 4.67 seconds Logistic Regression requires. This efficiency makes Decision Trees particularly appealing in environments where quick model deployment and rapid response are crucial.
+
+\subsubsection{Standard Deviations}
+For Logistic Regression, the standard deviations are remarkably low, 0.0012 for training and 0.0017 for testing, which underscores a high level of consistency across different model runs. This stability suggests that Logistic Regression, despite its lower mean accuracy, performs reliably under varying conditions within the confines of its model structure. On the other hand, Decision Trees exhibit slightly higher variability, with standard deviations of 0.0029 for training and 0.0038 for testing. Although standard deviations of Decision Tree are higher than those of Logistic Regression, they still indicate a reasonable consistency, especially given the higher complexity and flexibility of Decision Trees in handling diverse data types. The increased standard deviation in Decision Trees can be viewed as a trade-off for their enhanced accuracy and adaptability to the dataset’s multifaceted nature.
+
+\subsubsection{Conclusion}
+Decision Trees gain their advantage from an innate capability to manage datasets with diverse data types seamlessly. The KDD dataset, rich with categorical features like \verb|"protocol_type"| and \verb|"service"|, proves challenging for Logistic Regression. Typically, Logistic Regression anticipates linear relationships and prefers numerical inputs, demanding substantial preprocessing—like one-hot encoding—to handle categorical variables effectively. These necessary transformations not only bulk up the computational load but also complicate the model structure, potentially diluting its performance.
+\\\\
+In contrast, Decision Trees naturally dissect data based on feature types, eliminating the need for the cumbersome preprocessing that Logistic Regression relies on. Their adeptness at navigating the complex structure of the KDD dataset, combined with their high accuracy and operational efficiency, positions them as the more fitting model for such diverse datasets. The consistency in their performance metrics from training to testing further attests to their stability and reliability.
 
 
 \bibliographystyle{plain} 
